@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import { config } from 'dotenv'
 import employeeRoutes from  '../src/routes/employeeRoute';
+import userRouter from '../src/routes/userRoute'
 
 config();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // For routes
 app.use('/', employeeRoutes);
+app.use('/',userRouter);
 
 const port: Number= Number(process.env.PORT) || 9000;
 app.listen(port,()=>{
