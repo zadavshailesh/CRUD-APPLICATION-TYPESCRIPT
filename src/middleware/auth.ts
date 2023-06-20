@@ -15,8 +15,8 @@ const sendResetPasswordMail = async (username: string, token: string) => {
       secure: false,
       requireTLS: true,
       auth: {
-        user: 'zadavshailesh@gmail.com',
-        pass: 'buaivyslogxjwylz',
+        user: '',
+        pass: '',
       },
     });
 
