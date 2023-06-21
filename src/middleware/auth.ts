@@ -16,7 +16,7 @@ const sendResetPasswordMail = async (username: string, token: string) => {
       requireTLS: true,
       auth: {
         user: 'zadavshailesh@gmail.com',
-        pass: 'buaivyslogxjwylz',
+        pass: '',
       },
     });
 
@@ -176,7 +176,7 @@ const sendOTPToEmail = async(username,OTP)=>{
       requireTLS: true,
       auth: {
         user: 'zadavshailesh@gmail.com',
-        pass: 'buaivyslogxjwylz',
+        pass: '',
       },
     });
 
