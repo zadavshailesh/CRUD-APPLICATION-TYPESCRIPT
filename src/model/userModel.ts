@@ -6,6 +6,7 @@ class User extends Model {
   public username!: string;
   public password!: string;
   public resetPasswordToken!:string | null;
+  public otp!:number | null;
 }
 
 User.init(
@@ -26,6 +27,10 @@ User.init(
     },
     resetPasswordToken:{
       type:DataTypes.STRING,
+      allowNull:true,
+    },
+    otp:{
+      type:DataTypes.INTEGER,
       allowNull:true,
     }
   },

@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 
 const SECRET_KEY = '174F3C3EF569F';
 
-// For Reset password
+
 const sendResetPasswordMail = async (username: string, token: string) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -15,8 +15,8 @@ const sendResetPasswordMail = async (username: string, token: string) => {
       secure: false,
       requireTLS: true,
       auth: {
-        user: '',
-        pass: '',
+        user: 'zadavshailesh@gmail.com',
+        pass: 'buaivyslogxjwylz',
       },
     });
 
@@ -34,6 +34,7 @@ const sendResetPasswordMail = async (username: string, token: string) => {
   }
 };
 
+// For Reset password
 const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { username } = req.body;
@@ -65,7 +66,6 @@ const securePassword = async (password: string) => {
 };
 
 // For update Password
-
 const updatePassword = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization;
@@ -99,6 +99,7 @@ const updatePassword = async (req: Request, res: Response) => {
 };
 
 
+//For Register
 const register = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
@@ -116,6 +117,7 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
+//For Login
 const login = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
@@ -137,6 +139,8 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
+
+//For authentication
 const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization;
@@ -160,4 +164,100 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { register, login, forgotPassword, auth, updatePassword };
+
+
+//For OTP
+const sendOTPToEmail = async(username,OTP)=>{
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: 'zadavshailesh@gmail.com',
+        pass: 'buaivyslogxjwylz',
+      },
+    });
+
+    const mailOptions = {
+      from: 'zadavshailesh@gmail.com',
+      to: username,
+      subject: 'Reset Password',
+      html: `Your OTP for login is: ${OTP}`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email has been sent:', info.messageId);
+  } catch (error:any) {
+    console.log(error.message);
+  }
+};
+
+const loginByOTP = async (req: Request, res: Response) => {
+  var otp = Math.random();
+  otp = otp * 1000000;
+  otp = parseInt(otp.toString());
+  const OTP = otp;
+
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username } });
+    
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+    await sendOTPToEmail(username, OTP);
+    user.otp =OTP;
+    await user.save();
+   
+
+    res.json({ message: 'OTP is send to your Gmail, Please verify!!'});
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const verifyOTP = async (req: Request, res: Response) => {
+  try {
+    const { username,otp } = req.body;
+    const user = await User.findOne({ where: { username } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isOTPValid = otp.toString() === user.otp?.toString();
+
+    if (!isOTPValid) {
+      return res.status(401).json({ message: 'Invalid OTP' });
+    }
+
+    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ message: 'Login successful', token });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+export {
+   register, 
+   login, 
+   forgotPassword, 
+   auth, 
+   updatePassword,
+   sendOTPToEmail,
+   loginByOTP,
+   verifyOTP
+  };
