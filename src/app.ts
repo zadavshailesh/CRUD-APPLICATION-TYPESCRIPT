@@ -1,11 +1,15 @@
 import express, { Express } from 'express';
 import { config } from 'dotenv'
 import employeeRoutes from  '../src/routes/employeeRoute';
-import userRouter from '../src/routes/userRoute'
+import userRouter from '../src/routes/userRoute';
+import bodyParser from 'body-parser';
 
 config();
 
 const app: Express= express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.use(express.json());
 

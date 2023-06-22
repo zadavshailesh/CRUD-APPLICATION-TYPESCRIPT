@@ -3,9 +3,11 @@ import jwt from 'jsonwebtoken';
 import User from '../model/userModel';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode';
+
 
 const SECRET_KEY = '174F3C3EF569F';
-
 
 const sendResetPasswordMail = async (username: string, token: string) => {
   try {
@@ -65,7 +67,7 @@ const securePassword = async (password: string) => {
   }
 };
 
-// For update Password
+// For update Password using token
 const updatePassword = async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization;
@@ -98,8 +100,7 @@ const updatePassword = async (req: Request, res: Response) => {
   }
 };
 
-
-//For Register
+//Adding new User
 const register = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
@@ -109,15 +110,17 @@ const register = async (req: Request, res: Response) => {
     if (alreadyUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
+    const secretkey = speakeasy.generateSecret({length: 20}).base32;
 
-    const user = await User.create({ username, password: spassword });
+    const user = await User.create({ username, password: spassword, secret: secretkey });
     res.json({ message: 'Registration successful', user });
-  } catch (error:any) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
-//For Login
+
+//For Login without OTP
 const login = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
@@ -166,7 +169,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 
 
 
-//For OTP
+//For Random OTP
 const sendOTPToEmail = async(username,OTP)=>{
   try {
     const transporter = nodemailer.createTransport({
@@ -249,6 +252,112 @@ const verifyOTP = async (req: Request, res: Response) => {
 
 
 
+//For totp Code 
+
+//This funcion called inside getOTP
+const sendOTP = async (otp: string, username:string) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: 'zadavshailesh@gmail.com',
+        pass: '',
+      },
+    });
+
+    const mailOptions = {
+      from: 'zadavshailesh@gmail.com',
+      to: username,
+      subject: 'Reset Password',
+      html: `<h2>Your Login OTP is:${otp}</h2>`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email has been sent:', info.response);
+  } catch (error:any) {
+    console.log(error.message);
+  }
+};
+
+//This funcion also called inside getOTP
+const gererateOTP = async (secretKey:string) => {
+  try {
+      const OTP=speakeasy.totp({
+        secret:secretKey,
+        encoding:"base32",
+      })
+      return OTP;
+  } catch (error) {
+    console.log('Failed to generate QR code');
+    return null;
+  }
+};
+
+
+const getOTP = async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username } });
+    
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+    // const timestamp: number = (30-Math.floor((new Date().getTime()/1000.0%30)));
+
+    const otp = await gererateOTP(user.secret); 
+    await sendOTP(otp as string,username);
+
+    res.json({ message: 'Please verify OTP sent to registered gmail '});
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+const totpValidate = async (req: Request, res: Response) => {
+  try {
+    const { username, secret, otp } = req.body;
+
+    const valid = speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: otp,
+      window: 0,
+    });
+
+    if (!valid) {
+      return res.status(200).json({ message: 'OTP is invalid' });
+    }
+
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ message: 'Login successful!!', token });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
 
 
 export {
@@ -259,5 +368,7 @@ export {
    updatePassword,
    sendOTPToEmail,
    loginByOTP,
-   verifyOTP
+   verifyOTP,
+   getOTP,
+   totpValidate
   };
