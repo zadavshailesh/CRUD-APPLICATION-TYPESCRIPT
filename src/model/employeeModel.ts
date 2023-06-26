@@ -1,11 +1,17 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/db';
+import Project from './projectModel';
+import EmployeesPerProjects from './linkModel';
+
+
 
 class Employee extends Model {
   public id!: number;
   public name!: string;
   public age!: number;
   public address!: string;
+  public projects!: [];
+
 }
 
 Employee.init(
@@ -30,9 +36,9 @@ Employee.init(
   {
     sequelize,
     modelName: 'employee',
-    timestamps:false
+    timestamps: false,
   }
 );
 
-export default Employee;
 
+export default Employee;

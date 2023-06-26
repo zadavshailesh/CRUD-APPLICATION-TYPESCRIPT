@@ -354,12 +354,6 @@ const totpValidate = async (req: Request, res: Response) => {
 
 
 
-
-
-
-
-
-
 export {
    register, 
    login, 
