@@ -7,6 +7,7 @@ class EmployeesPerProjects extends Model {
   public id!: number;
   public projectid!: number;
   public employeeid!: number;
+  public position!:string;
 }
 
 EmployeesPerProjects.init(
@@ -33,6 +34,10 @@ EmployeesPerProjects.init(
         key: 'id',
       },
     },
+    position:{
+      type:DataTypes.STRING,
+      allowNull:true
+    }
   },
   {
     sequelize,

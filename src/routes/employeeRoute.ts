@@ -4,6 +4,7 @@ import {
   read,
   readById,
   update,
+  // updateByProjectId,
   deleteEmployee
 } from '../controllers/employeeController';
 
@@ -13,10 +14,10 @@ import {auth} from "../middleware/auth"
 const employeeRouter: Router = express.Router();
 
 employeeRouter.post('/login/employee',auth,insert); 
-employeeRouter.get('/employees', auth,read);
-employeeRouter.get('/employees/:id', auth, readById);
+employeeRouter.get('/employees',read);
+employeeRouter.get('/employees/:id', readById);
 employeeRouter.put('/employee/:id', update);
-// employeeRouter.put('/employee/:id/project/:projectId', updateByProject);
+// employeeRouter.put('/employee/:id/project/:projectId', updateByProjectId);
 employeeRouter.delete('/employee/:id', auth, deleteEmployee);
 
 export default employeeRouter;
