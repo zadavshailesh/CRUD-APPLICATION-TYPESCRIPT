@@ -118,59 +118,76 @@ const readById = async (req: Request, res: Response) => {
 };
 
 
-// UPDATE
+// UPDATE without db function
+// const update = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, age, address, projects } = req.body;
+
+//     // Update the employee table
+//     const updatedEmployeeData = await Employee.update(
+//       { name, age, address },
+//       { where: { id }, returning: true }
+//     );
+        
+//         // Delete projects not present in the request body
+//         await EmployeesPerProjects.destroy({
+//           where: {
+//             employeeid: id,
+//             projectid: {
+//               [Op.notIn]:projects.map((project:any) => project.projectid),
+//             },
+//           },
+//         });
+
+//     // Update employees_per_projects table
+//     if (projects && projects.length > 0) {
+//       for (const project of projects) {
+//         const { projectid, position } = project;
+
+//         try {
+//           const existingProject = await EmployeesPerProjects.findOne({
+//             where: {
+//               projectid: projectid,
+//               employeeid: id
+//             }
+//           });
+
+//           if (!existingProject) {
+//             await EmployeesPerProjects.create({
+//               projectid: projectid,
+//               employeeid: id,
+//               position: position
+//             });
+//           } else {
+//             await EmployeesPerProjects.update(
+//               { position:position },
+//               { where: { projectid: projectid, employeeid: id } }
+//             );
+//           }
+//         } catch (error: any) {
+//           console.log(error.message);
+//         }
+//       }
+//     } 
+//     res.json({ message: 'Employee updated successfully!', employeeData: updatedEmployeeData });
+//   }catch (error: any) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
+//UPDATE with db function
 const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name, age, address, projects } = req.body;
 
-    // Update the employee table
-    const updatedEmployeeData = await Employee.update(
-      { name, age, address },
-      { where: { id }, returning: true }
-    );
+    const updateQuery =`SELECT updateEmployees(${id},'${name}',${age},'${address}','${JSON.stringify(projects)}')`;
+
+  await sequelize.query(updateQuery);
         
-        // Delete projects not present in the request body
-        await EmployeesPerProjects.destroy({
-          where: {
-            employeeid: id,
-            projectid: {
-              [Op.notIn]:projects.map((project:any) => project.projectid),
-            },
-          },
-        });
-
-    // Update employees_per_projects table
-    if (projects && projects.length > 0) {
-      for (const project of projects) {
-        const { projectid, position } = project;
-
-        try {
-          const existingProject = await EmployeesPerProjects.findOne({
-            where: {
-              projectid: projectid,
-              employeeid: id
-            }
-          });
-
-          if (!existingProject) {
-            await EmployeesPerProjects.create({
-              projectid: projectid,
-              employeeid: id,
-              position: position
-            });
-          } else {
-            await EmployeesPerProjects.update(
-              { position:position },
-              { where: { projectid: projectid, employeeid: id } }
-            );
-          }
-        } catch (error: any) {
-          console.log(error.message);
-        }
-      }
-    } 
-    res.json({ message: 'Employee updated successfully!', employeeData: updatedEmployeeData });
+    res.json({ message: 'Employee updated successfully!'});
   }catch (error: any) {
     res.status(500).json({ error: error.message });
   }
