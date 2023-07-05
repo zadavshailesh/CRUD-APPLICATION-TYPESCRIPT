@@ -17,6 +17,7 @@ const insert = async (req: Request, res: Response) => {
   }
 };
 
+
 // READ
 const read = async (req: Request, res: Response) => {
   try {
@@ -103,7 +104,7 @@ const readById = async (req: Request, res: Response) => {
         projects: projects
       };
 
-   return res.json({ message: "Employee Details!", outputData });
+   return res.status(200).json({ message: "Employee Details!", outputData });
     }
 
     const outputData = {
@@ -111,7 +112,7 @@ const readById = async (req: Request, res: Response) => {
       address: address,
       projects: result
     };
- return res.json({ message: "Employee Details!", outputData });
+    return res.status(200).json({ message: "Employee Details!", outputData });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -187,7 +188,7 @@ const update = async (req: Request, res: Response) => {
 
   await sequelize.query(updateQuery);
         
-    res.json({ message: 'Employee updated successfully!'});
+    res.status(200).json({ message: 'Employee updated successfully!'});
   }catch (error: any) {
     res.status(500).json({ error: error.message });
   }

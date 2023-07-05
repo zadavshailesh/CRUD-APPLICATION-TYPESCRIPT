@@ -1,0 +1,205 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CRUD APPLICATION",
+    "description": "This is a CRUD Application Project where employees can be inserted, updated, and deleted",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "schemas": {
+      "EmployeeGetDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Employee updated successfully!"
+          },
+          "outputData": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the employee"
+              },
+              "address": {
+                "type": "string",
+                "description": "The address of the employee"
+              },
+              "projects": {
+                "type": "array",
+                "description": "An array of projects associated with the employee",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "The ID of the project"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The code of the project"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "EmployeeUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "inputData": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the employee"
+              },
+              "address": {
+                "type": "string",
+                "description": "The address of the employee"
+              },
+              "projects": {
+                "type": "array",
+                "description": "An array of projects associated with the employee",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "The ID of the project"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The code of the project"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "EmployeeUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Employee updated successfully!"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/employees/{id}": {
+      "get": {
+        "summary": "Get employee details by ID",
+        "description": "Get employee details and projects based on the Employee ID",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "description": "Bearer token for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the employee",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"success",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EmployeeGetDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/employee/{id}":{
+      "put":{
+        "summary":"Update employee details by ID",
+        "description":"Update employee details and employees_per_projects based on the employee ID",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "description": "Bearer token for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the employee",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody":{
+          "required":"true",
+          "content":{
+            "application/json":{
+              "schema":{
+                "$ref":"#/components/schemas/EmployeeUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses":{
+          "200":{
+            "description":"success",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EmployeeUpdateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
